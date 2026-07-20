@@ -1,13 +1,41 @@
-codigo_impt,codigo_xml
-3190119900,31901133
-3190119900,31901143
-3190119900,31901131
-3190119900,31901137
-3190119900,31901144
-3190119900,31901174
-3190110199,31901101
-3190130000,319013
-3390140000,339014
-3390309900,33903096
-3390330000,339033
-3390460000,339046
+codigo_impt,codigo_xml,colunas
+3190119900,31901133,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,31901143,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,31901131,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,31901137,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,31901144,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,31901174,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190110199,31901101,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190130000,319013,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390140000,339014,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390309900,33903,Dotação Inicial|Dotação Atualizada
+3390309900,33903096,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390330000,339033,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390460000,339046,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,319011,Dotação Inicial|Dotação Atualizada
+3190169900,319016,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190949900,319094,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390300100,33903001,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390309900,33903007,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390300902,33903009,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390302100,33903021,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390340100,339034,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390369900,339036,Dotação Inicial|Dotação Atualizada
+3390369900,33903606,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390369900,33903699,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390399999,339039,Dotação Inicial|Dotação Atualizada
+3390399999,33903905,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390394300,33903943,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390394400,33903944,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390395099,3390395,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390399999,3390399999,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390990000,33904,Dotação Inicial|Dotação Atualizada
+4490529900,449052,Dotação Inicial|Dotação Atualizada
+4490529900,44905234,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+4490529900,44905299,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3171000000,3171,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3371000000,3371,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390309900,33903004,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3390303900,33903039,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+4471000000,4471,Dotação Inicial|Dotação Atualizada|Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas
+3190119900,3190111,Despesas Empenhadas|Despesas Liquidadas|Despesas Pagas

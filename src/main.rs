@@ -44,16 +44,23 @@ fn main() {
                                 let mut totais_acumulados: HashMap<String, f64> = HashMap::new();
                                 let mut encontrou_mapeamento = false;
 
-                                if let Some(xml_keys) = guia_codigos.get(&impt_cod) {
+                                if let Some(entries) = guia_codigos.get(&impt_cod) {
                                     encontrou_mapeamento = true;
-                                    for xml_cod in xml_keys {
-                                        if let Some(tabela_xml) = mapa_xml.get(xml_cod) {
+                                    for entry in entries {
+                                        if let Some(tabela_xml) = mapa_xml.get(&entry.xml_key) {
                                             for (conta, valor) in tabela_xml {
-                                                *totais_acumulados.entry(conta.clone()).or_insert(0.0) += valor;
+                                                // Lógica de filtro:
+                                                // Se a lista de permitidos estiver vazia, aceita tudo.
+                                                // Caso contrário, verifica se 'conta' está na lista.
+                                                let permitido = entry.allowed_columns.is_empty() ||
+                                                    entry.allowed_columns.contains(conta);
+
+                                                if permitido {
+                                                    *totais_acumulados.entry(conta.clone()).or_insert(0.0) += valor;
+                                                }
                                             }
                                         } else {
-                                            // DEBUG: Se o código está no CSV, mas não no XML
-                                            println!("  -> [AVISO] Chave mapeada '{}' não encontrada no XML.", xml_cod);
+                                            println!("  -> [AVISO] Chave mapeada '{}' não encontrada no XML.", entry.xml_key);
                                         }
                                     }
                                 }

@@ -21,10 +21,11 @@ pub fn atualizar_linha_dinamica(linha_original: &str, tabela_redirecionadora: Op
 
     let resultado = re.replace_all(linha_original, |caps: &Captures| {
         let inicio = &caps[1];
-        let label_impt = caps[4].trim();
+        let valor_original = &caps[2]; // O valor que já estava na linha (ex: "224512,74")
         let final_tag = &caps[3];
+        let label_impt = caps[4].trim();
 
-        // 🛡️ PASSO 1: Valores especiais (ex: código município)
+        // 🛡️ PASSO 1: Valores especiais (ex: código município) - Mantém a regra original
         if let Some(valor_fixo) = config::traduzir_valor_especial(label_impt) {
             return format!("{}{:.2}{}", inicio, format!("{:.2}", valor_fixo).replace('.', ","), final_tag);
         }
@@ -32,13 +33,25 @@ pub fn atualizar_linha_dinamica(linha_original: &str, tabela_redirecionadora: Op
         // 🛡️ PASSO 2: Busca no mapa
         let label_busca = guia_nomes.get(label_impt).map(|s| s.as_str()).unwrap_or(label_impt);
 
-        let novo_valor = match &tabela_redirecionadora {
-            Some(tabela) => *tabela.get(label_busca).unwrap_or(&0.0),
-            None => 0.0,
-        };
-
-        let valor_fmt = format!("{:.2}", novo_valor).replace('.', ",");
-        format!("{}{}{}", inicio, valor_fmt, final_tag)
+        // Lógica corrigida:
+        // Se a tabela existe e tem o valor, usamos o novo.
+        // CASO CONTRÁRIO, retornamos o valor_original que capturamos da linha.
+        match &tabela_redirecionadora {
+            Some(tabela) => {
+                if let Some(&novo_valor) = tabela.get(label_busca) {
+                    // Atualiza com o novo valor
+                    let valor_fmt = format!("{:.2}", novo_valor).replace('.', ",");
+                    format!("{}{}{}", inicio, valor_fmt, final_tag)
+                } else {
+                    // Mantém o valor original, sem alterar nada
+                    format!("{}{}{}", inicio, valor_original, final_tag)
+                }
+            },
+            None => {
+                // Não há tabela de atualização, mantém tudo como está
+                format!("{}{}{}", inicio, valor_original, final_tag)
+            }
+        }
     });
 
     resultado.to_string()
