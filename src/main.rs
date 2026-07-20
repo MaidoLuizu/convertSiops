@@ -2,92 +2,82 @@ mod parser;
 mod reader;
 mod xml_loader;
 mod writer;
+mod config;
 
 use parser::LayoutRegistro;
 use std::fs;
 use std::collections::HashMap;
-use encoding_rs::WINDOWS_1252;
 
-// Função de busca (deixe aqui fora do main)
-
-fn limpar_codigo(cod: &str) -> String {
-    // Remove pontos, traços e espaços extras
+/// Função de normalização idêntica à do config.rs
+fn normalizar(cod: &str) -> String {
     cod.replace('.', "").replace('-', "").trim().to_string()
-}
-fn buscar_valor_por_aproximacao(
-    cod_original: &str,
-    mapa_valores: &HashMap<String, f64>
-) -> Option<f64> {
-    // Limpa o código de entrada
-    let cod_limpo = limpar_codigo(cod_original);
-
-    // 1. Tenta buscar o código exato (limpo)
-    if let Some(&valor) = mapa_valores.get(&cod_limpo) {
-        return Some(valor);
-    }
-
-    // 2. Tenta por prefixos (usando o código limpo)
-    let comprimentos = [10, 8, 6, 4]; // Adicionei 4 para cobrir contas mais curtas
-    for &len in &comprimentos {
-        if cod_limpo.len() >= len {
-            let prefixo = &cod_limpo[..len];
-
-            if let Some((_, valor)) = mapa_valores.iter().find(|(cod, _)| cod.starts_with(prefixo)) {
-                return Some(*valor);
-            }
-        }
-    }
-    None
 }
 
 fn main() {
-    // ATO 1: Preparar os ingredientes (Carregar XML)
-    // Dica: Certifique-se que o caminho aponta para o ARQUIVO, não para a pasta
-    let mapa_valores = xml_loader::carregar_mapa_valores("./xml/DEMONSTRATIVO DA DESPESA DO ORGÃO.xml")
+    // 1. Limpeza do arquivo de saída anterior
+    let _ = fs::remove_file("processado.impt");
+
+    // 2. Carregamento dos dados
+    println!("Carregando dados do XML...");
+    let mapa_xml = xml_loader::carregar_mapa_valores("./xml/DEMONSTRATIVO DA DESPESA DO ORGÃO.xml")
         .expect("Erro ao ler o XML");
 
-    // ATO 2: Preparar a pasta
+    let guia_codigos = config::obter_guia_codigos_map();
+
+    // 3. Processamento dos arquivos
     let diretorio = "./entrada";
-    let caminhos = fs::read_dir(diretorio).expect("Diretório de entrada não encontrado");
+    if let Ok(caminhos) = fs::read_dir(diretorio) {
+        for entrada in caminhos.flatten() {
+            let caminho_arquivo = entrada.path();
 
-    // ATO 3: Cozinhar (Loop pelos arquivos)
-    for entrada in caminhos {
-        let caminho_arquivo = entrada.expect("Erro ao ler arquivo").path();
+            // Processa apenas arquivos .IMPT
+            if caminho_arquivo.extension().and_then(|s| s.to_str()) == Some("IMPT") {
+                println!("Processando arquivo: {}", caminho_arquivo.display());
 
-        // Só processa arquivos com a extensão .IMPT
-        if caminho_arquivo.extension().and_then(|s| s.to_str()) == Some("IMPT") {
-            println!("\nProcessando: {}", caminho_arquivo.display());
+                if let Ok(linhas) = reader::ler_linhas(&caminho_arquivo) {
+                    for linha in linhas {
+                        let linha_final = match LayoutRegistro::parse_linha(&linha) {
+                            Ok(registro) => {
+                                let impt_cod = normalizar(&registro.natureza_despesa);
 
-            if let Ok(linhas) = reader::ler_linhas(&caminho_arquivo) {
-                for linha in linhas {
-                    // Tenta transformar a linha em um REGISTRO
-                    match LayoutRegistro::parse_linha(&linha) {
-                        Ok(registro) => {
-                            let valor_opcional = buscar_valor_por_aproximacao(&registro.natureza_despesa, &mapa_valores);
+                                // ACUMULAÇÃO: Busca todas as chaves XML mapeadas e soma seus valores
+                                let mut totais_acumulados: HashMap<String, f64> = HashMap::new();
+                                let mut encontrou_mapeamento = false;
 
-                            // 2. Decide o que fazer com a linha
-                            let linha_final = if let Some(valor) = valor_opcional {
-                                writer::atualizar_linha_impt(&linha, valor)
-                            } else {
-                                linha.clone()
-                            };
+                                if let Some(xml_keys) = guia_codigos.get(&impt_cod) {
+                                    encontrou_mapeamento = true;
+                                    for xml_cod in xml_keys {
+                                        if let Some(tabela_xml) = mapa_xml.get(xml_cod) {
+                                            for (conta, valor) in tabela_xml {
+                                                *totais_acumulados.entry(conta.clone()).or_insert(0.0) += valor;
+                                            }
+                                        } else {
+                                            // DEBUG: Se o código está no CSV, mas não no XML
+                                            println!("  -> [AVISO] Chave mapeada '{}' não encontrada no XML.", xml_cod);
+                                        }
+                                    }
+                                }
 
-                            // 3. Salva a linha (seja ela modificada ou original)
-                            if let Err(e) = writer::salvar_linha("processado.impt", &linha_final) {
-                                eprintln!("Erro ao gravar no arquivo: {}", e);
+                                // DEBUG: Se não houver mapeamento para o código IMPT
+                                if !encontrou_mapeamento {
+                                    println!("  -> [DEBUG] Nenhum mapeamento para: {}", impt_cod);
+                                }
+
+                                // Atualiza a linha com os valores acumulados
+                                writer::atualizar_linha_dinamica(&linha, Some(&totais_acumulados))
                             }
-                        }
-                        Err(_) => {
-                            // Se a linha não é um registro válido, grava ela original
-                            // Isso garante que o arquivo de saída tenha o mesmo tamanho que o de entrada
-                            if let Err(e) = writer::salvar_linha("processado.impt", &linha) {
-                                eprintln!("Erro ao gravar linha original: {}", e);
-                            }
+                            // Se a linha não for válida, mantém a original
+                            Err(_) => linha.to_string(),
+                        };
+
+                        // 4. Salva a linha processada
+                        if let Err(e) = writer::salvar_linha("processado.impt", &linha_final) {
+                            eprintln!("Erro ao gravar: {}", e);
                         }
                     }
                 }
             }
         }
     }
-    println!("\nVarredura concluída.");
+    println!("\nProcessamento concluído. Verifique o arquivo 'processado.impt'.");
 }
